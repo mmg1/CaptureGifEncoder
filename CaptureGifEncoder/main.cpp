@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "WindowInfo.h"
+#include <dwmapi.h>
 
 namespace winrt
 {
@@ -97,7 +98,9 @@ winrt::IAsyncAction MainAsync(std::vector<std::wstring> const& args)
 
     // Setup Windows.Graphics.Capture
     auto item = util::CreateCaptureItemForWindow(window.WindowHandle);
-    auto itemSize = item.Size();
+    RECT extendedFrameBounds = {};
+    winrt::check_hresult(DwmGetWindowAttribute(window.WindowHandle, DWMWA_EXTENDED_FRAME_BOUNDS, reinterpret_cast<void*>(&extendedFrameBounds), sizeof(extendedFrameBounds)));
+    auto itemSize = winrt::SizeInt32{ extendedFrameBounds.right - extendedFrameBounds.left, extendedFrameBounds.bottom - extendedFrameBounds.top };
     auto framePool = winrt::Direct3D11CaptureFramePool::CreateFreeThreaded(
         device,
         winrt::DirectXPixelFormat::B8G8R8A8UIntNormalized,
